@@ -166,7 +166,7 @@ namespace TestProjectSudokuSolver
             int missingNumber = 6;
 
             PuzzleNumberLocation expected = new PuzzleNumberLocation { ColumnId = 3, RowId = 1, Value=6 };    
-            PuzzleNumberLocation actual = GetPuzzleNumberLocationHorizontalCheck(puzzle, rowIndex, emptySpaceColumnIndexes,  missingNumber);
+            PuzzleNumberLocation actual = GetPuzzleNumberLocationFromHorizontal(puzzle, rowIndex, emptySpaceColumnIndexes,  missingNumber);
             expected.Should().BeEquivalentTo(actual);
         }
         [Fact]
@@ -178,17 +178,30 @@ namespace TestProjectSudokuSolver
             int missingNumber = 8;
 
             PuzzleNumberLocation expected = new PuzzleNumberLocation { ColumnId = 0, RowId = 3, Value = 8 };
-            PuzzleNumberLocation actual = GetPuzzleNumberLocationVerticalCheck(puzzle, columnIndex, emptySpaceRowIndexes, missingNumber);
+            PuzzleNumberLocation actual = GetPuzzleNumberLocationFromVertical(puzzle, columnIndex, emptySpaceRowIndexes, missingNumber);
             expected.Should().BeEquivalentTo(actual);
         }
         [Fact]
         public void GetPossibleNumbersTest()
         {
             int[] expected = new[] { 1,2,3,4,5 };
-            int[] actual = GetPossibleNumbers(new int[] { 0, 6, 0, 5, 0 });
+            int[] bulk = new[] { 0, 6, 0, 5, 0 };
+            int[] actual = GetPossibleNumbers(bulk.Length);
 
             expected.Should().BeEquivalentTo(actual);
         }
+
+        [Fact]
+        public void GetPossibleNumbersShouldBeEmpty()
+        {
+            int[] expected = new int[0];
+            int[] bulk = new int[0];
+            int[] actual = GetPossibleNumbers(bulk.Length);
+
+            Assert.Equal(expected, actual);
+        }
+        
+
         [Fact]
         public void NumberOfMissingTest()
         {
@@ -206,7 +219,36 @@ namespace TestProjectSudokuSolver
             int actual = puzzle.NrOfSquares();
             Assert.Equal(expected, actual);
         }
+
+
+        [Fact]
+        public void InsertPuzzleNumberShouldWork()
+        {
+            int[,] puzzle = SeedPuzzle();
+            int expected = 2;
+            PuzzleNumberLocation puzzleNumberLocation= new PuzzleNumberLocation { RowId = 0, ColumnId = 1,Value = 2 };
+            puzzle.InsertPuzzleNumber(puzzleNumberLocation);
+            int actual = puzzle[0, 1];
+
+            Assert.Equal(expected, actual);
+        }
+        [Theory]
+        [InlineData(-1,1,1, "RowId")]
+        [InlineData(99,1,1, "RowId")]
+        [InlineData(0,-1,1,"ColumnId")]
+        [InlineData(0,99,1,"ColumnId")]
+        [InlineData(1,1,-1, "Value")]
+        [InlineData(1,1,99, "Value")]
+        public void InsertPuzzleNumberShouldFail(int rowId, int columnId, int value, string param)
+        {
+            int[,] puzzle = SeedPuzzle();
+            PuzzleNumberLocation puzzleNumberLocation = new PuzzleNumberLocation { RowId = rowId, ColumnId = columnId, Value = value };
+
+            Assert.Throws<ArgumentException>(param, ()=> puzzle.InsertPuzzleNumber(puzzleNumberLocation));
+
+        }
         
+
     }
     
 }

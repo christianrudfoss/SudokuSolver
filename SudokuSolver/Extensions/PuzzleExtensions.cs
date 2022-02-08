@@ -57,10 +57,10 @@ namespace SudokuSolver.Extensions
 
                 foreach(int missingNumber in missingNumbersInBulk)
                 {
-                    PuzzleNumberLocation puzzleNumberLocation = GetPuzzleNumberLocationHorizontalCheck(puzzle, rowIndex, emptySpaceColumnIndexes, missingNumber);
+                    PuzzleNumberLocation puzzleNumberLocation = GetPuzzleNumberLocationFromHorizontal(puzzle, rowIndex, emptySpaceColumnIndexes, missingNumber);
                     if(puzzleNumberLocation != null)
                     {
-                        puzzle.InsertPuzzleNumber(puzzleNumberLocation.RowId, puzzleNumberLocation.ColumnId, puzzleNumberLocation.Value);
+                        puzzle.InsertPuzzleNumber(puzzleNumberLocation);
                         emptySpaceColumnIndexes = GetEmptySpaceIndexInBulk(row);
                     }
                 }
@@ -76,10 +76,10 @@ namespace SudokuSolver.Extensions
 
                 foreach (int missingNumber in missingNumbersInBulk)
                 {
-                    PuzzleNumberLocation puzzleNumberLocation = GetPuzzleNumberLocationVerticalCheck(puzzle, columnIndex, emptySpaceRowIndexes, missingNumber);
+                    PuzzleNumberLocation puzzleNumberLocation = GetPuzzleNumberLocationFromVertical(puzzle, columnIndex, emptySpaceRowIndexes, missingNumber);
                     if (puzzleNumberLocation != null)
                     {
-                        puzzle.InsertPuzzleNumber(puzzleNumberLocation.RowId, puzzleNumberLocation.ColumnId, puzzleNumberLocation.Value);
+                        puzzle.InsertPuzzleNumber(puzzleNumberLocation);
                         emptySpaceRowIndexes = GetEmptySpaceIndexInBulk(column);
                     }
                 }
@@ -95,10 +95,10 @@ namespace SudokuSolver.Extensions
 
                 foreach (int missingNumber in missingNumbersInBulk)
                 {
-                    PuzzleNumberLocation puzzleNumberLocation = GetPuzzleNumberLocationSquareCheck(puzzle, squareIndex, emptySpaceSquareIndexes, missingNumber);
+                    PuzzleNumberLocation puzzleNumberLocation = GetPuzzleNumberLocationFromSquare(puzzle, squareIndex, emptySpaceSquareIndexes, missingNumber);
                     if (puzzleNumberLocation != null)
                     {
-                        puzzle.InsertPuzzleNumber(puzzleNumberLocation.RowId, puzzleNumberLocation.ColumnId, puzzleNumberLocation.Value);
+                        puzzle.InsertPuzzleNumber(puzzleNumberLocation);
                         emptySpaceSquareIndexes = GetEmptySpaceIndexInBulk(square);
                     }
                 }
@@ -112,11 +112,20 @@ namespace SudokuSolver.Extensions
         {
             return GetRowFromPuzzle(puzzle, rowIndex).Where(n => n == missingNumber).Count() > 0;
         }
-        private static void InsertPuzzleNumber(this int[,] puzzle, int RowId, int ColumnId, int Value)
+        public static void InsertPuzzleNumber(this int[,] puzzle, PuzzleNumberLocation puzzleNumberLocation)
         {
-            puzzle[RowId, ColumnId] = Value;
+            if (puzzleNumberLocation.RowId < 0 || puzzleNumberLocation.RowId >= puzzle.NrOfRows())
+                throw new ArgumentException("RowId can't be negative, or more than " + (puzzle.NrOfRows()-1), "RowId");
+
+            if (puzzleNumberLocation.ColumnId < 0 || puzzleNumberLocation.ColumnId >= puzzle.NrOfColumns())
+                throw new ArgumentException("ColumnId can't be negative, or more than " + (puzzle.NrOfColumns() - 1), "ColumnId");
+
+            if (puzzleNumberLocation.Value < 1 || puzzleNumberLocation.Value > puzzle.NrOfColumns())
+                throw new ArgumentException("Value can't be negative, or more than " + puzzle.NrOfColumns(), "Value");
+
+            puzzle[puzzleNumberLocation.RowId, puzzleNumberLocation.ColumnId] = puzzleNumberLocation.Value;
         }
-        public static PuzzleNumberLocation GetPuzzleNumberLocationHorizontalCheck(int[,] puzzle, int rowIndex, int[] emptySpaceColumnIndexes, int missingNumber)
+        public static PuzzleNumberLocation GetPuzzleNumberLocationFromHorizontal(int[,] puzzle, int rowIndex, int[] emptySpaceColumnIndexes, int missingNumber)
         {
             PuzzleNumberLocation puzzleNumberLocation = new PuzzleNumberLocation { ColumnId = int.MinValue, RowId = int.MinValue, Value = int.MinValue };
 
@@ -144,7 +153,7 @@ namespace SudokuSolver.Extensions
         }
 
         
-        public static PuzzleNumberLocation GetPuzzleNumberLocationVerticalCheck(int[,] puzzle, int columnIndex, int[] emptySpaceRowIndexes, int missingNumber)
+        public static PuzzleNumberLocation GetPuzzleNumberLocationFromVertical(int[,] puzzle, int columnIndex, int[] emptySpaceRowIndexes, int missingNumber)
         {
             PuzzleNumberLocation puzzleNumberLocation = new PuzzleNumberLocation { ColumnId = int.MinValue, RowId = int.MinValue, Value = int.MinValue };
 
@@ -172,7 +181,7 @@ namespace SudokuSolver.Extensions
         }
 
         
-        public static PuzzleNumberLocation GetPuzzleNumberLocationSquareCheck(int[,] puzzle, int squareIndex, int[] emptySpaceSquareIndexes, int missingNumber)
+        public static PuzzleNumberLocation GetPuzzleNumberLocationFromSquare(int[,] puzzle, int squareIndex, int[] emptySpaceSquareIndexes, int missingNumber)
         {
             PuzzleNumberLocation puzzleNumberLocation = new PuzzleNumberLocation { ColumnId = int.MinValue, RowId = int.MinValue, Value = int.MinValue };
             int columnIndex = int.MinValue;
@@ -190,10 +199,10 @@ namespace SudokuSolver.Extensions
             }
             if (nrOfPossibleIndex_ForMissingNumber == 2 && columnIndex > int.MinValue && rowIndex > int.MinValue)
             {
-                puzzle.InsertPuzzleNumber(rowIndex, columnIndex, missingNumber);
                 puzzleNumberLocation.RowId = rowIndex;
                 puzzleNumberLocation.ColumnId = columnIndex;
                 puzzleNumberLocation.Value = missingNumber;
+                puzzle.InsertPuzzleNumber(puzzleNumberLocation);
             }
             if (puzzleNumberLocation.RowId == int.MinValue)
                 return null;
@@ -488,12 +497,12 @@ namespace SudokuSolver.Extensions
 
         public static int[] GetMissingNumbersInBulk(int[] bulk)
         {
-            return GetPossibleNumbers(bulk).Except(bulk).ToArray();
+            return GetPossibleNumbers(bulk.Length).Except(bulk).ToArray();
         }
 
-        public static int[] GetPossibleNumbers(int[] bulk)
+        public static int[] GetPossibleNumbers(int maxvalue)
         {
-            return Enumerable.Range(1, bulk.Length).ToArray();
+            return Enumerable.Range(1, maxvalue).ToArray();
         }
 
         public static int[] GetSquareFromPuzzle(int[,] puzzle, int squareIndex)
@@ -626,5 +635,6 @@ namespace SudokuSolver.Extensions
 
             return column;
         }
+       
     }
 }
