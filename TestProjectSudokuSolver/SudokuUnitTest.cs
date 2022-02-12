@@ -1,9 +1,11 @@
-using SudokuSolver.Models;
 using System;
 using System.Collections.Generic;
 using Xunit;
-using static SudokuSolver.Extensions.PuzzleExtensions;
+using SudokuLibrary.Extensions;
 using FluentAssertions;
+using SudokuLibrary.Models;
+using SudokuLibrary;
+
 namespace TestProjectSudokuSolver
 {
     public class SudokuUnitTest
@@ -34,7 +36,7 @@ namespace TestProjectSudokuSolver
 
             int[,] puzzle = SeedPuzzle();
 
-            int[] lstActual = GetRowFromPuzzle(puzzle, rowIndex);
+            int[] lstActual = PuzzleProcessor.GetRowFromPuzzle(puzzle, rowIndex);
 
             lstExpected.Should().BeEquivalentTo(lstActual);
         }
@@ -47,7 +49,7 @@ namespace TestProjectSudokuSolver
 
             int[,] puzzle = SeedPuzzle();
 
-            int[] lstActual = GetColumnFromPuzzle(puzzle, colIndex);
+            int[] lstActual = PuzzleProcessor.GetColumnFromPuzzle(puzzle, colIndex);
 
             lstExpected.Should().BeEquivalentTo(lstActual);
         }
@@ -57,7 +59,7 @@ namespace TestProjectSudokuSolver
             int[] lstExpected = new int[] { 0,6,9,5,8,0,4,0,0 };
             int squareIndex = 7;
             int[,] puzzle = SeedPuzzle();
-            int[] lstActual = GetSquareFromPuzzle(puzzle, squareIndex);
+            int[] lstActual = PuzzleProcessor.GetSquareFromPuzzle(puzzle, squareIndex);
 
             lstExpected.Should().BeEquivalentTo(lstActual);
         }
@@ -70,7 +72,7 @@ namespace TestProjectSudokuSolver
             int[] expected = new int[] { 2, 4, 6 };
             int[] bulk = new int[] { 1, 5, 7, 0, 9, 0, 3, 8, 0 };
 
-            int[] actual = GetMissingNumbersInBulk(bulk);
+            int[] actual = PuzzleProcessor.GetMissingNumbersInBulk(bulk);
 
             expected.Should().BeEquivalentTo(actual);
 
@@ -81,7 +83,7 @@ namespace TestProjectSudokuSolver
             int[] expected = new int[] { 3, 5, 8 };
             int[] bulk = new int[] { 1, 5, 7, 0, 9, 0, 3, 8, 0 };
 
-            int[] actual = GetEmptySpaceIndexInBulk(bulk);
+            int[] actual = PuzzleProcessor.GetEmptySpaceIndexInBulk(bulk);
 
             expected.Should().BeEquivalentTo(actual);
         }
@@ -117,7 +119,7 @@ namespace TestProjectSudokuSolver
             int index = 2;
 
             int expected = 0;
-            int actual = GetRowIndexFromSquareIndex(squareIndex, index);
+            int actual = PuzzleProcessor.GetRowIndexFromSquareIndex(squareIndex, index);
             Assert.Equal(expected,actual);
 
         }
@@ -129,7 +131,7 @@ namespace TestProjectSudokuSolver
             int index = 6;
 
             int expected = 5;
-            int actual = GetRowIndexFromSquareIndex(squareIndex, index);
+            int actual = PuzzleProcessor.GetRowIndexFromSquareIndex(squareIndex, index);
             Assert.Equal(expected, actual);
 
         }
@@ -141,7 +143,7 @@ namespace TestProjectSudokuSolver
             int index = 2;
 
             int expected = 2;
-            int actual = GetColumnIndexFromSquareIndex(squareIndex, index);
+            int actual = PuzzleProcessor.GetColumnIndexFromSquareIndex(squareIndex, index);
             Assert.Equal(expected, actual);
 
         }
@@ -153,7 +155,7 @@ namespace TestProjectSudokuSolver
             int index = 5;
 
             int expected = 5;
-            int actual = GetColumnIndexFromSquareIndex(squareIndex, index);
+            int actual = PuzzleProcessor.GetColumnIndexFromSquareIndex(squareIndex, index);
             Assert.Equal(expected, actual);
 
         }
@@ -166,7 +168,7 @@ namespace TestProjectSudokuSolver
             int missingNumber = 6;
 
             PuzzleNumberLocation expected = new PuzzleNumberLocation { ColumnId = 3, RowId = 1, Value=6 };    
-            PuzzleNumberLocation actual = GetPuzzleNumberLocationFromHorizontal(puzzle, rowIndex, emptySpaceColumnIndexes,  missingNumber);
+            PuzzleNumberLocation actual = PuzzleProcessor.GetPuzzleNumberLocationFromHorizontal(puzzle, rowIndex, emptySpaceColumnIndexes,  missingNumber);
             expected.Should().BeEquivalentTo(actual);
         }
         [Fact]
@@ -178,7 +180,7 @@ namespace TestProjectSudokuSolver
             int missingNumber = 8;
 
             PuzzleNumberLocation expected = new PuzzleNumberLocation { ColumnId = 0, RowId = 3, Value = 8 };
-            PuzzleNumberLocation actual = GetPuzzleNumberLocationFromVertical(puzzle, columnIndex, emptySpaceRowIndexes, missingNumber);
+            PuzzleNumberLocation actual = PuzzleProcessor.GetPuzzleNumberLocationFromVertical(puzzle, columnIndex, emptySpaceRowIndexes, missingNumber);
             expected.Should().BeEquivalentTo(actual);
         }
         [Fact]
@@ -186,7 +188,7 @@ namespace TestProjectSudokuSolver
         {
             int[] expected = new[] { 1,2,3,4,5 };
             int[] bulk = new[] { 0, 6, 0, 5, 0 };
-            int[] actual = GetPossibleNumbers(bulk.Length);
+            int[] actual = PuzzleProcessor.GetPossibleNumbers(bulk.Length);
 
             expected.Should().BeEquivalentTo(actual);
         }
@@ -196,7 +198,7 @@ namespace TestProjectSudokuSolver
         {
             int[] expected = new int[0];
             int[] bulk = new int[0];
-            int[] actual = GetPossibleNumbers(bulk.Length);
+            int[] actual = PuzzleProcessor.GetPossibleNumbers(bulk.Length);
 
             Assert.Equal(expected, actual);
         }
